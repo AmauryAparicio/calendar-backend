@@ -7,7 +7,8 @@
   "scripts": {
     "ts:node": "ts-node src/index.ts",
     "clean": "RMDIR /Q/S build",
-    "start": "nodemon",
+    "start": "node build/index.js",
+    "start:ts": "nodemon",
     "dev": "tsc && node build/index.js",
     "build": "tsc"
   },
