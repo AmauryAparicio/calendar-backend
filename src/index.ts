@@ -1,12 +1,31 @@
 import express from 'express';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import auth from './router/auth';
+import events from './router/events';
+import dbConnection from './database/config';
+
+dotenv.config();
 
 /* ----------------------------- Initialization ----------------------------- */
 
 const App = express();
 
+/* ---------------------------------- CORS ---------------------------------- */
+
+App.use(cors());
+
+/* -------------------------------- Database -------------------------------- */
+
+dbConnection();
+
 /* -------------------------------- Settings -------------------------------- */
 
-App.set('port', process.env.PORT || 4000);
+App.set('port', process.env.PORT || 3000);
+
+/* ------------------------------ Static files ------------------------------ */
+
+App.use(express.static('public'));
 
 /* ------------------------------- Middlewares ------------------------------ */
 
@@ -15,7 +34,8 @@ App.use(express.urlencoded({ extended: false }));
 
 /* --------------------------------- Routes --------------------------------- */
 
-/* ------------------------------ Static files ------------------------------ */
+App.use('/api/auth', auth);
+App.use('/api/events', events);
 
 /* --------------------------- Starting the server -------------------------- */
 
