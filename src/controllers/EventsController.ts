@@ -33,32 +33,28 @@ export default class EventsController {
       });
   };
 
-  public createEvent = (
+  public createEvent = async (
     { body }: iCustomRequest<iEventReq>,
     res: Response<iCompleteResponse>
   ) => {
-    const event = new Event(body);
-    event
-      .save()
-      .then((ev: iEventDocument) => {
-        return res.status(201).json({
-          status: "success",
-          event: {
-            _id: ev._id,
-            title: ev.title,
-            notes: ev.notes,
-            start: ev.start,
-            end: ev.end,
-          },
-          user: body.user,
-        });
-      })
-      .catch((err) => {
-        return res.status(500).json({
-          status: "error",
-          err: err,
-        });
+    try {
+      const newEv = new Event(body);
+      const savedEv = await newEv.save();
+      const event = await savedEv
+        .populate({ path: "user", select: "name" })
+        .execPopulate();
+
+      return res.status(201).json({
+        status: "success",
+        event,
+        user: body.user,
       });
+    } catch (err) {
+      return res.status(500).json({
+        status: "error",
+        err: err,
+      });
+    }
   };
 
   public updateEvent = async (
@@ -68,9 +64,9 @@ export default class EventsController {
     try {
       const eventId = params.id;
 
-      const ev = (await Event.findById(
-        eventId
-      ).exec()) as iEventDocument | null;
+      const ev = (await Event.findById(eventId)
+        .populate("user", "name")
+        .exec()) as iEventDocument | null;
 
       if (ev && ev.user?._id.toString() === body.user._id) {
         ev.title = body.title;
@@ -84,10 +80,6 @@ export default class EventsController {
           status: "success",
           event: {
             ...save.toJSON(),
-            user: {
-              name: ev.user?.name,
-              _id: ev.user?._id,
-            } as iUserDocument,
           },
           user: body.user,
         });
@@ -97,6 +89,7 @@ export default class EventsController {
         err: "No tiene privilegio de editar este evento",
       });
     } catch (err) {
+      console.log("Update error: ", err);
       return res.status(500).json({
         status: "error",
         err: err,
