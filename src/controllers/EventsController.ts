@@ -84,6 +84,10 @@ export default class EventsController {
           status: "success",
           event: {
             ...save.toJSON(),
+            user: {
+              name: ev.user?.name,
+              _id: ev.user?._id,
+            } as iUserDocument,
           },
           user: body.user,
         });
