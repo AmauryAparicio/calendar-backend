@@ -15,8 +15,6 @@ export default class EventsController {
     res: Response<iCompleteResponse>
   ) => {
     Event.find()
-      .where("user")
-      .equals(body.user._id)
       .populate("user", "name")
       .then((events: Array<iEventDocument>) => {
         return res.status(200).json({
