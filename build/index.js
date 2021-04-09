@@ -13,13 +13,13 @@ dotenv_1.default.config();
 var App = express_1.default();
 App.use(cors_1.default());
 config_1.default();
-App.set('port', process.env.PORT || 3000);
-App.use(express_1.default.static('public'));
+App.set("port", process.env.PORT || 4000);
+App.use(express_1.default.static("public"));
 App.use(express_1.default.json());
 App.use(express_1.default.urlencoded({ extended: false }));
-App.use('/api/auth', auth_1.default);
-App.use('/api/events', events_1.default);
-App.listen(App.get('port'), function () {
-    console.log("Server on port " + App.get('port'));
+App.use("/api/auth", auth_1.default);
+App.use("/api/events", events_1.default);
+App.listen(App.get("port"), function () {
+    console.log("Server on port " + App.get("port"));
 });
 //# sourceMappingURL=index.js.map

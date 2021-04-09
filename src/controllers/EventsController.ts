@@ -70,9 +70,9 @@ export default class EventsController {
 
       const ev = (await Event.findById(
         eventId
-      ).execPopulate()) as iEventDocument | null;
+      ).exec()) as iEventDocument | null;
 
-      if (ev && ev.user?._id === body.user._id) {
+      if (ev && ev.user?._id.toString() === body.user._id) {
         ev.title = body.title;
         ev.start = body.start;
         ev.end = body.end;
@@ -95,7 +95,7 @@ export default class EventsController {
     } catch (err) {
       return res.status(500).json({
         status: "error",
-        err: JSON.stringify(err),
+        err: err,
       });
     }
   };
