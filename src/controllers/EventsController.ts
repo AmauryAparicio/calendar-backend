@@ -95,7 +95,7 @@ export default class EventsController {
     } catch (err) {
       return res.status(500).json({
         status: "error",
-        err: err,
+        err: JSON.stringify(err),
       });
     }
   };
