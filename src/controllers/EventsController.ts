@@ -61,67 +61,43 @@ export default class EventsController {
       });
   };
 
-  public updateEvent = (
+  public updateEvent = async (
     { body, params }: iCustomRequest<iEventReq>,
     res: Response<iCompleteResponse>
   ) => {
-    const eventId = params.id;
+    try {
+      const eventId = params.id;
 
-    Event.findByIdAndUpdate(
-      eventId,
-      body as iEventDocument,
-      { new: true },
-      (err, event) => {
-        if (err) {
-          return res.status(500).json({
-            status: "error",
-            err: err,
-          });
-        } else {
-          if (event) {
-            if (event.user?._id !== body.user._id) {
-              return res.status(401).json({
-                status: "error",
-                err: "No tiene privilegio de editar este evento",
-              });
-            } else {
-              event.populate("user", (err, popEvent) => {
-                if (err) {
-                  return res.status(500).json({
-                    status: "error",
-                    err: "Server Error",
-                  });
-                } else {
-                  if (popEvent) {
-                    return res.status(200).json({
-                      status: "success",
-                      event: {
-                        ...popEvent.toJSON(),
-                        user: {
-                          _id: popEvent.user?._id,
-                          name: popEvent.user?.name as string,
-                        } as iUserDocument,
-                      },
-                      user: body.user,
-                    });
-                  } else {
-                    return res.status(404).json({
-                      status: "error",
-                      err: "Event not found...",
-                    });
-                  }
-                }
-              });
-            }
-          } else {
-            return res.status(404).json({
-              status: "error",
-              err: "Event not found...",
-            });
-          }
-        }
+      const ev = (await Event.findById(
+        eventId
+      ).execPopulate()) as iEventDocument | null;
+
+      if (ev && ev.user?._id === body.user._id) {
+        ev.title = body.title;
+        ev.start = body.start;
+        ev.end = body.end;
+        ev.notes = body.notes;
+
+        const save = await ev.save();
+
+        return res.status(200).json({
+          status: "success",
+          event: {
+            ...save.toJSON(),
+          },
+          user: body.user,
+        });
       }
-    );
+      return res.status(401).json({
+        status: "error",
+        err: "No tiene privilegio de editar este evento",
+      });
+    } catch (err) {
+      return res.status(500).json({
+        status: "error",
+        err: err,
+      });
+    }
   };
 
   public deleteEvent = (
